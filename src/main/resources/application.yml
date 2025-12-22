@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: nexia-core
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nexia
+    username: nexia
+    password: nexia
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
