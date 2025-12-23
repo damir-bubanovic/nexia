@@ -8,6 +8,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.nexia.core.api.error.NotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 
 
 import java.time.Instant;
@@ -55,6 +59,14 @@ public class UserController {
     }
 
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
+        if (!users.existsById(id)) {
+            throw new NotFoundException("user not found");
+        }
+        users.deleteById(id);
+    }
 
 
 }
