@@ -2,20 +2,17 @@ package com.nexia.core.api;
 
 import com.nexia.core.api.dto.CreateUserRequest;
 import com.nexia.core.api.dto.UserResponse;
+import com.nexia.core.api.error.ConflictException;
+import com.nexia.core.api.error.NotFoundException;
 import com.nexia.core.domain.User;
 import com.nexia.core.repo.UserRepository;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import com.nexia.core.api.error.NotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,7 +29,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse create(@Valid @RequestBody CreateUserRequest req) {
         if (users.existsByEmail(req.email())) {
-            throw new com.nexia.core.api.error.ConflictException("email already exists");
+            throw new ConflictException("email already exists");
         }
         User u = new User(UUID.randomUUID(), req.email().trim(), req.fullName().trim(), Instant.now());
         User saved = users.save(u);
@@ -40,10 +37,12 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponse> list() {
-        return users.findAll().stream()
-                .map(u -> new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt()))
-                .toList();
+    public Page<UserResponse> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return users.findAll(PageRequest.of(page, size))
+                .map(u -> new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt()));
     }
 
     @GetMapping("/{id}")
@@ -58,7 +57,6 @@ public class UserController {
         return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
     }
 
-
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
@@ -67,6 +65,4 @@ public class UserController {
         }
         users.deleteById(id);
     }
-
-
 }
