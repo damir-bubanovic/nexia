@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -37,11 +38,8 @@ public class UserController {
     }
 
     @GetMapping
-    public Page<UserResponse> list(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        return users.findAll(PageRequest.of(page, size))
+    public Page<UserResponse> list(Pageable pageable) {
+        return users.findAll(pageable)
                 .map(u -> new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt()));
     }
 
