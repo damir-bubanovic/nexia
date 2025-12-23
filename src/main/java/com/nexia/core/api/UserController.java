@@ -7,6 +7,8 @@ import com.nexia.core.repo.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.nexia.core.api.error.NotFoundException;
+
 
 import java.time.Instant;
 import java.util.List;
@@ -39,4 +41,20 @@ public class UserController {
                 .map(u -> new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt()))
                 .toList();
     }
+
+    @GetMapping("/{id}")
+    public UserResponse getById(@PathVariable UUID id) {
+        User u = users.findById(id).orElseThrow(() -> new NotFoundException("user not found"));
+        return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
+    }
+
+    @GetMapping("/by-email")
+    public UserResponse getByEmail(@RequestParam String email) {
+        User u = users.findByEmail(email).orElseThrow(() -> new NotFoundException("user not found"));
+        return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
+    }
+
+
+
+
 }

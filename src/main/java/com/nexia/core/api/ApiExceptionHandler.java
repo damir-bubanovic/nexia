@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.nexia.core.api.error.NotFoundException;
+
 
 import java.net.URI;
 import java.util.stream.Collectors;
@@ -36,4 +38,14 @@ public class ApiExceptionHandler {
         pd.setType(URI.create("https://nexia.dev/problems/validation"));
         return ResponseEntity.badRequest().body(pd);
     }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleNotFound(NotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        pd.setTitle("Not Found");
+        pd.setDetail(ex.getMessage());
+        pd.setType(URI.create("https://nexia.dev/problems/not-found"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pd);
+    }
+
 }
