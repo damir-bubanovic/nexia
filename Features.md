@@ -7,7 +7,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 1 – Core Backend Foundation
-**Status:** In progress
+**Status:** Done
 
 - Spring Boot application bootstrap
 - Maven build configuration
@@ -21,7 +21,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 2 – Domain Model & Persistence
-**Status:** Planned
+**Status:** Done
 
 - Define core domain entities
 - Repository layer using Spring Data JPA
@@ -33,7 +33,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 3 – API Design & Documentation
-**Status:** Planned
+**Status:** Done
 
 - REST API versioning
 - Global exception handling

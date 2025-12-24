@@ -4,15 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.springframework.core.ParameterizedTypeReference;
-
 
 import java.util.Map;
 
@@ -21,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserApiIT {
+
+    private static final String API_BASE = "/api/v1/users";
 
     @SuppressWarnings("resource")
     @Container
@@ -54,7 +54,7 @@ class UserApiIT {
         );
 
         ResponseEntity<Map<String, Object>> first =
-                rest.exchange(base + "/api/users", HttpMethod.POST, create,
+                rest.exchange(base + API_BASE, HttpMethod.POST, create,
                         new ParameterizedTypeReference<>() {});
 
         assertThat(first.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -62,7 +62,7 @@ class UserApiIT {
         assertThat(first.getBody()).containsKey("id");
 
         ResponseEntity<Map<String, Object>> second =
-                rest.exchange(base + "/api/users", HttpMethod.POST, create,
+                rest.exchange(base + API_BASE, HttpMethod.POST, create,
                         new ParameterizedTypeReference<>() {});
 
         assertThat(second.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
@@ -70,7 +70,6 @@ class UserApiIT {
         assertThat(second.getBody()).containsKey("type");
         assertThat(second.getBody()).containsKey("status");
     }
-
 
     @Test
     void getByEmail_returnsUser() {
@@ -85,13 +84,13 @@ class UserApiIT {
         );
 
         ResponseEntity<Map<String, Object>> created =
-                rest.exchange(base + "/api/users", HttpMethod.POST, create,
+                rest.exchange(base + API_BASE, HttpMethod.POST, create,
                         new ParameterizedTypeReference<>() {});
 
         assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         ResponseEntity<Map<String, Object>> fetched =
-                rest.exchange(base + "/api/users/by-email?email=lookup@example.com", HttpMethod.GET, null,
+                rest.exchange(base + API_BASE + "/by-email?email=lookup@example.com", HttpMethod.GET, null,
                         new ParameterizedTypeReference<>() {});
 
         assertThat(fetched.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -113,7 +112,7 @@ class UserApiIT {
         );
 
         ResponseEntity<Map<String, Object>> created =
-                rest.exchange(base + "/api/users", HttpMethod.POST, create,
+                rest.exchange(base + API_BASE, HttpMethod.POST, create,
                         new ParameterizedTypeReference<>() {});
 
         assertThat(created.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -123,12 +122,12 @@ class UserApiIT {
         assertThat(id).isNotBlank();
 
         ResponseEntity<Void> deleted =
-                rest.exchange(base + "/api/users/" + id, HttpMethod.DELETE, null, Void.class);
+                rest.exchange(base + API_BASE + "/" + id, HttpMethod.DELETE, null, Void.class);
 
         assertThat(deleted.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
         ResponseEntity<Map<String, Object>> getAfterDelete =
-                rest.exchange(base + "/api/users/" + id, HttpMethod.GET, null,
+                rest.exchange(base + API_BASE + "/" + id, HttpMethod.GET, null,
                         new ParameterizedTypeReference<>() {});
 
         assertThat(getAfterDelete.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -136,7 +135,4 @@ class UserApiIT {
         assertThat(getAfterDelete.getBody()).containsKey("type");
         assertThat(getAfterDelete.getBody()).containsEntry("status", 404);
     }
-
-
-
 }
