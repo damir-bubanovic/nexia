@@ -25,17 +25,65 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    protected User() { }
+    @Column(name = "password_hash")
+    private String passwordHash;
 
-    public User(UUID id, String email, String fullName, Instant createdAt) {
+    @Column(nullable = false)
+    private String role;
+
+    protected User() {
+        // Required by JPA
+    }
+
+    /**
+     * New full constructor including auth fields.
+     */
+    public User(UUID id,
+                String email,
+                String fullName,
+                Instant createdAt,
+                String passwordHash,
+                String role) {
         this.id = id;
         this.email = email;
         this.fullName = fullName;
         this.createdAt = createdAt;
+        this.passwordHash = passwordHash;
+        this.role = role;
     }
 
-    public UUID getId() { return id; }
-    public String getEmail() { return email; }
-    public String getFullName() { return fullName; }
-    public Instant getCreatedAt() { return createdAt; }
+    /**
+     * Backwards-compatible constructor for existing code that doesn’t set auth fields yet.
+     * Uses null passwordHash and default role "USER".
+     */
+    public User(UUID id,
+                String email,
+                String fullName,
+                Instant createdAt) {
+        this(id, email, fullName, createdAt, null, "USER");
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public String getRole() {
+        return role;
+    }
 }

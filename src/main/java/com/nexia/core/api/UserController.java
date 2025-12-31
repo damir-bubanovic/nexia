@@ -15,8 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -45,10 +48,12 @@ public class UserController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse create(@Valid @RequestBody CreateUserRequest req) {
         if (users.existsByEmail(req.email().trim())) {
             throw new ConflictException("email already exists");
         }
+        // Uses the 4-arg constructor -> passwordHash null, role "USER"
         User u = new User(UUID.randomUUID(), req.email().trim(), req.fullName().trim(), Instant.now());
         User saved = users.save(u);
         return new UserResponse(saved.getId(), saved.getEmail(), saved.getFullName(), saved.getCreatedAt());
@@ -59,8 +64,15 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "OK")
     })
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<UserResponse> list(Pageable pageable) {
-        return users.findAll(pageable)
+        int page = pageable.getPageNumber() < 0 ? 0 : pageable.getPageNumber();
+        int size = pageable.getPageSize() <= 0 ? 20 : pageable.getPageSize();
+
+        // Ignore client-provided sort completely; always sort by createdAt
+        Pageable sanitized = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+
+        return users.findAll(sanitized)
                 .map(u -> new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt()));
     }
 
@@ -72,6 +84,7 @@ public class UserController {
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getById(@PathVariable UUID id) {
         User u = users.findById(id).orElseThrow(() -> new NotFoundException("user not found"));
         return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
@@ -85,6 +98,7 @@ public class UserController {
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/by-email")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getByEmail(@RequestParam String email) {
         User u = users.findByEmail(email.trim()).orElseThrow(() -> new NotFoundException("user not found"));
         return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
@@ -99,6 +113,7 @@ public class UserController {
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(@PathVariable UUID id) {
         if (!users.existsById(id)) {
             throw new NotFoundException("user not found");

@@ -26,3 +26,11 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+nexia:
+  security:
+    jwt:
+      issuer: nexia
+      # Default for dev/test; overridden by env var NEXIA_JWT_SECRET in real deployments
+      secret: ${NEXIA_JWT_SECRET:change-me-change-me-change-me-change-me}
+      ttlSeconds: ${NEXIA_JWT_TTL_SECONDS:3600}

@@ -45,7 +45,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 4 – Security & Authentication
-**Status:** Planned
+**Status:** Done
 
 - Spring Security integration
 - JWT-based authentication
