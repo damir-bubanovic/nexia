@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: nexia-gateway
+
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 5s
+
+      default-filters:
+        - name: Retry
+          args:
+            retries: 2
+            methods: GET
+            backoff:
+              firstBackoff: 100ms
+              maxBackoff: 500ms
+              factor: 2
+              basedOnPreviousValue: true
+
+        - name: CircuitBreaker
+          args:
+            name: nexiaCoreCircuitBreaker
+            fallbackUri: forward:/fallback/core-unavailable
+
+      routes:
+        - id: nexia-core
+          uri: ${NEXIA_CORE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized

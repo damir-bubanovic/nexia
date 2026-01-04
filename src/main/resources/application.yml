@@ -3,34 +3,39 @@ server:
 
 spring:
   application:
-    name: nexia-core
-  datasource:
-    url: jdbc:postgresql://localhost:5432/nexia
-    username: nexia
-    password: nexia
-  jpa:
-    hibernate:
-      ddl-auto: validate
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
+    name: nexia-gateway
+
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 5s
+
+      routes:
+        - id: nexia-core
+          uri: ${NEXIA_CORE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                backoff:
+                  firstBackoff: 100ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: true
+            - name: CircuitBreaker
+              args:
+                name: nexiaCoreCircuitBreaker
+                fallbackUri: forward:/fallback/core-unavailable
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-
-nexia:
-  security:
-    jwt:
-      issuer: nexia
-      # Default for dev/test; overridden by env var NEXIA_JWT_SECRET in real deployments
-      secret: ${NEXIA_JWT_SECRET:change-me-change-me-change-me-change-me}
-      ttlSeconds: ${NEXIA_JWT_TTL_SECONDS:3600}
+  endpoint:
+    health:
+      show-details: when_authorized
