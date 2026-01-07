@@ -1,0 +1,34 @@
+Restart rules (what to restart when you change something):
+
+If you change nexia-gateway/src/main/resources/application.yml
+
+Rebuild gateway jar → rebuild gateway image → restart gateway container.
+
+Commands:
+
+cd nexia-gateway
+../mvnw clean package -DskipTests
+cd ..
+docker compose build --no-cache nexia-gateway
+docker compose up -d --force-recreate nexia-gateway
+
+
+If you change nexia-core/src/main/resources/application.yml
+
+Rebuild core jar → rebuild core image → restart core container.
+
+Commands:
+
+./mvnw clean package -DskipTests
+docker compose build --no-cache nexia-core
+docker compose up -d --force-recreate nexia-core
+
+
+If you change docker-compose.yml
+
+Recreate the affected services (or all).
+
+Commands (all):
+
+docker compose down
+docker compose up -d --build

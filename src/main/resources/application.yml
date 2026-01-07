@@ -26,6 +26,7 @@ spring:
                   maxBackoff: 500ms
                   factor: 2
                   basedOnPreviousValue: true
+
             - name: CircuitBreaker
               args:
                 name: nexiaCoreCircuitBreaker
@@ -35,7 +36,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
   endpoint:
     health:
       show-details: when_authorized
