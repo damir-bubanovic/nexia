@@ -5,6 +5,8 @@ import com.nexia.core.api.dto.LoginRequest;
 import com.nexia.core.api.dto.RegisterRequest;
 import com.nexia.core.api.error.ConflictException;
 import com.nexia.core.domain.User;
+import com.nexia.core.messaging.UserEventPublisher;
+import com.nexia.core.messaging.events.UserRegisteredEvent;
 import com.nexia.core.repo.UserRepository;
 import com.nexia.core.security.JwtService;
 import jakarta.validation.Valid;
@@ -26,15 +28,18 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserEventPublisher userEventPublisher;
 
     public AuthController(UserRepository users,
                           PasswordEncoder passwordEncoder,
                           AuthenticationManager authenticationManager,
-                          JwtService jwtService) {
+                          JwtService jwtService,
+                          UserEventPublisher userEventPublisher) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.userEventPublisher = userEventPublisher;
     }
 
     @PostMapping("/register")
@@ -56,6 +61,11 @@ public class AuthController {
         );
 
         User saved = users.save(user);
+
+        // Phase 6: publish async event
+        userEventPublisher.publishUserRegistered(
+                UserRegisteredEvent.of(saved.getId(), saved.getEmail())
+        );
 
         String token = jwtService.generate(saved);
         return new AuthResponse(token, "Bearer", jwtService.ttlSeconds());

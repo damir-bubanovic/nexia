@@ -69,7 +69,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 6 – Messaging & Asynchronous Processing
-**Status:** Planned
+**Status:** Done
 
 - Event-driven architecture basics
 - Message broker integration (Kafka or RabbitMQ)

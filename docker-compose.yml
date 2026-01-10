@@ -11,13 +11,31 @@ services:
     volumes:
       - nexia_db:/var/lib/postgresql/data
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: nexia-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: nexia
+      RABBITMQ_DEFAULT_PASS: nexia
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   nexia-core:
     build:
       context: .
       dockerfile: Dockerfile.core
     container_name: nexia-core
     depends_on:
-      - db
+      db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     environment:
       # Force Spring Boot datasource config (avoids YAML/env mapping issues)
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/nexia
@@ -38,6 +56,12 @@ services:
 
       # Keep this too (harmless)
       NEXIA_JWT_SECRET: change-me-change-me-change-me-change-me
+
+      # RabbitMQ connection (core -> rabbitmq container)
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: nexia
+      SPRING_RABBITMQ_PASSWORD: nexia
     ports:
       - "8081:8081"
 

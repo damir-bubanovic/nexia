@@ -1,42 +1,44 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8081}
 
 spring:
   application:
-    name: nexia-gateway
+    name: nexia-core
 
-  cloud:
-    gateway:
-      httpclient:
-        connect-timeout: 2000
-        response-timeout: 5s
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nexia}
+    username: ${SPRING_DATASOURCE_USERNAME:nexia}
+    password: ${SPRING_DATASOURCE_PASSWORD:nexia}
 
-      routes:
-        - id: nexia-core
-          uri: ${NEXIA_CORE_URL:http://localhost:8081}
-          predicates:
-            - Path=/api/**
-          filters:
-            - name: Retry
-              args:
-                retries: 2
-                methods: GET
-                backoff:
-                  firstBackoff: 100ms
-                  maxBackoff: 500ms
-                  factor: 2
-                  basedOnPreviousValue: true
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+    properties:
+      hibernate:
+        format_sql: true
 
-            - name: CircuitBreaker
-              args:
-                name: nexiaCoreCircuitBreaker
-                fallbackUri: forward:/fallback/core-unavailable
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    locations: ${SPRING_FLYWAY_LOCATIONS:classpath:db/migration}
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:nexia}
+    password: ${SPRING_RABBITMQ_PASSWORD:nexia}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,info
   endpoint:
     health:
       show-details: when_authorized
+
+nexia:
+  security:
+    jwt:
+      secret: ${NEXIA_SECURITY_JWT_SECRET:${NEXIA_JWT_SECRET:change-me-change-me-change-me-change-me}}
+  jwt:
+    ttl-seconds: ${NEXIA_JWT_TTL_SECONDS:3600}
