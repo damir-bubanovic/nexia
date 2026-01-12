@@ -30,11 +30,35 @@ spring:
 management:
   endpoints:
     web:
+      base-path: /actuator
       exposure:
-        include: health,info
+        include: health,info,prometheus
+
+    # Spring Boot 3.4+ endpoint access defaults
+    access:
+      default: none
+      max-permitted: unrestricted
+
   endpoint:
     health:
-      show-details: when_authorized
+      access: unrestricted
+      probes:
+        enabled: true
+      show-details: always
+
+    info:
+      access: unrestricted
+
+    prometheus:
+      access: unrestricted
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+  tracing:
+    sampling:
+      probability: 1.0
 
 nexia:
   security:

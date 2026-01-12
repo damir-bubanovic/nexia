@@ -37,27 +37,25 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      # Force Spring Boot datasource config (avoids YAML/env mapping issues)
+      # DB
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/nexia
       SPRING_DATASOURCE_USERNAME: nexia
       SPRING_DATASOURCE_PASSWORD: nexia
 
-      # Optional but keeps behavior consistent
+      # JPA/Flyway
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_FLYWAY_ENABLED: "true"
       SPRING_FLYWAY_LOCATIONS: classpath:db/migration
 
-      # Ensure core uses port 8081 inside the container
+      # App
       SERVER_PORT: 8081
 
-      # JWT config used by @Value("${nexia.security.jwt.secret}")
+      # JWT
       NEXIA_SECURITY_JWT_SECRET: change-me-change-me-change-me-change-me
       NEXIA_JWT_TTL_SECONDS: "3600"
-
-      # Keep this too (harmless)
       NEXIA_JWT_SECRET: change-me-change-me-change-me-change-me
 
-      # RabbitMQ connection (core -> rabbitmq container)
+      # RabbitMQ
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: nexia
@@ -77,5 +75,26 @@ services:
     ports:
       - "8080:8080"
 
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: nexia-prometheus
+    depends_on:
+      - nexia-core
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: nexia-grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - nexia_grafana:/var/lib/grafana
+
 volumes:
   nexia_db:
+  nexia_grafana:

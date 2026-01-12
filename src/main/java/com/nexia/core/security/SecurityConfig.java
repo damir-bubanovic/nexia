@@ -30,24 +30,28 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http,
                                             JwtAuthFilter jwtAuthFilter) throws Exception {
 
-        // Stateless JWT, CSRF off
         http.csrf(csrf -> csrf.disable());
-        http.sessionManagement(sm ->
-                sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
+        http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/hello").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+
+                // Actuator: explicitly allow health probes + prometheus
+                .requestMatchers(
+                        "/actuator",
+                        "/actuator/health",
+                        "/actuator/health/**",
+                        "/actuator/info",
+                        "/actuator/prometheus"
+                ).permitAll()
 
                 // Everything else: must be authenticated
                 .anyRequest().authenticated()
         );
 
-        // Enable JWT auth for every request
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
