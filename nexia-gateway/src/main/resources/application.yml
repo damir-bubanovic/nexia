@@ -33,6 +33,11 @@ spring:
           predicates:
             - Path=/api/**
 
+        - id: nexia-bff
+          uri: http://nexia-bff:3001
+          predicates:
+            - Path=/bff/**
+
 management:
   endpoints:
     web:

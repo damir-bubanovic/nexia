@@ -92,7 +92,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 8 – Node.js Services
-**Status:** Planned
+**Status:** Done
 
 - Node.js-based microservice introduction
 - REST or BFF (Backend-for-Frontend) service

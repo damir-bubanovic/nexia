@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -87,6 +88,23 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getById(@PathVariable UUID id) {
         User u = users.findById(id).orElseThrow(() -> new NotFoundException("user not found"));
+        return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
+    }
+
+    @Operation(summary = "Get current user (me)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public UserResponse me(Authentication authentication) {
+        // DbUserDetailsService should use email as username; authentication.getName() returns that
+        String email = authentication.getName();
+        User u = users.findByEmail(email.trim()).orElseThrow(() -> new NotFoundException("user not found"));
         return new UserResponse(u.getId(), u.getEmail(), u.getFullName(), u.getCreatedAt());
     }
 

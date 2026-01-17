@@ -32,7 +32,7 @@ management:
     web:
       base-path: /actuator
       exposure:
-        include: health,info,prometheus
+        include: health,info,prometheus,mappings
 
     # Spring Boot 3.4+ endpoint access defaults
     access:
@@ -52,6 +52,9 @@ management:
     prometheus:
       access: unrestricted
 
+    mappings:
+      access: unrestricted
+
   metrics:
     tags:
       application: ${spring.application.name}
@@ -66,3 +69,5 @@ nexia:
       secret: ${NEXIA_SECURITY_JWT_SECRET:${NEXIA_JWT_SECRET:change-me-change-me-change-me-change-me}}
   jwt:
     ttl-seconds: ${NEXIA_JWT_TTL_SECONDS:3600}
+
+

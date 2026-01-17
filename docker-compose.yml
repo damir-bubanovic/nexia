@@ -63,6 +63,19 @@ services:
     ports:
       - "8081:8081"
 
+  nexia-bff:
+    build:
+      context: ./nexia-bff
+      dockerfile: Dockerfile
+    container_name: nexia-bff
+    depends_on:
+      - nexia-core
+    environment:
+      PORT: 3001
+      NEXIA_CORE_URL: http://nexia-core:8081
+    ports:
+      - "3001:3001"
+
   nexia-gateway:
     build:
       context: ./nexia-gateway
@@ -70,6 +83,7 @@ services:
     container_name: nexia-gateway
     depends_on:
       - nexia-core
+      - nexia-bff
     environment:
       NEXIA_CORE_URL: http://nexia-core:8081
     ports:
