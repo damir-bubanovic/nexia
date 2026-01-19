@@ -67,7 +67,5 @@ nexia:
   security:
     jwt:
       secret: ${NEXIA_SECURITY_JWT_SECRET:${NEXIA_JWT_SECRET:change-me-change-me-change-me-change-me}}
-  jwt:
-    ttl-seconds: ${NEXIA_JWT_TTL_SECONDS:3600}
-
-
+      issuer: ${NEXIA_SECURITY_JWT_ISSUER:nexia}
+      ttlSeconds: ${NEXIA_SECURITY_JWT_TTLSECONDS:${NEXIA_JWT_TTL_SECONDS:3600}}

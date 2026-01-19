@@ -50,10 +50,10 @@ services:
       # App
       SERVER_PORT: 8081
 
-      # JWT
+      # JWT (aligned with JwtService @Value keys)
       NEXIA_SECURITY_JWT_SECRET: change-me-change-me-change-me-change-me
-      NEXIA_JWT_TTL_SECONDS: "3600"
-      NEXIA_JWT_SECRET: change-me-change-me-change-me-change-me
+      NEXIA_SECURITY_JWT_TTLSECONDS: "3600"
+      NEXIA_SECURITY_JWT_ISSUER: "nexia"
 
       # RabbitMQ
       SPRING_RABBITMQ_HOST: rabbitmq
