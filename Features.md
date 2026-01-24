@@ -115,7 +115,7 @@ foundations to advanced microservices and AI integration.
 ---
 
 ## Phase 10 – CI/CD & Deployment
-**Status:** Planned
+**Status:** Done
 
 - CI pipeline setup
 - Automated testing
