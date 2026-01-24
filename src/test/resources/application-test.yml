@@ -1,0 +1,9 @@
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false
+    template:
+      enabled: false

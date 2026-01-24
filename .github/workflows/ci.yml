@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Ensure mvnw is executable
+        run: chmod +x mvnw
+
+      - name: Maven tests
+        run: ./mvnw -B test
+
+      - name: Build jar (skip tests)
+        run: ./mvnw -B -DskipTests package
+
+      - name: Docker build (core)
+        # If Docker is missing for any reason, don't fail the whole CI.
+        run: |
+          if command -v docker >/dev/null 2>&1; then
+            docker build -f Dockerfile.core -t nexia-core:ci .
+          else
+            echo "Docker not available; skipping image build."
+          fi
+
+  node-install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install Node dependencies
+        working-directory: nexia-bff
+        run: npm ci
